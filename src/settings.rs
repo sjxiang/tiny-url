@@ -5,6 +5,7 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub server: Server,
+    pub database: Database,
 }
 
 #[derive(Debug, Deserialize)]
@@ -17,6 +18,12 @@ impl Server {
     pub fn get_ip(&self) -> String {
         format!("{}:{}", self.ip, self.port)
     }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Database {
+    pub url: String,
+    pub pool_size: u32,
 }
 
 

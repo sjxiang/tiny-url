@@ -1,4 +1,5 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use sqlx::mysql::MySqlPoolOptions;
 use tera::{Tera, Context};
 use crate::settings::Settings;
 
@@ -54,13 +55,22 @@ async fn manual_hello() -> impl Responder {
 }
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result<(), sqlx::Error> {
 
     let s = Settings::new().unwrap();
     let ip = s.server.get_ip();
+    let url = s.database.url;
+    let pool_size = s.database.pool_size;
 
-    HttpServer::new(|| {
+    let pool = MySqlPoolOptions::new()
+        .max_connections(pool_size)
+        .connect(&url)
+        .await?;
+
+
+    HttpServer::new(move || {
         App::new()
+            .app_data(web::Data::new(pool.clone()))  // 把 db 连接池移到 HTTP server 中管理
             .service(index)
             .service(api::links::create_link)
             .service(api::links::get_all_links)
@@ -72,5 +82,7 @@ async fn main() -> std::io::Result<()> {
     // .bind(("127.0.0.1", 8080))?
     .bind(&ip)?
     .run()
-    .await
+    .await?;
+
+    Ok(())
 }
