@@ -10,3 +10,6 @@ actix-web = "4"
 serde = {version = "1.0.147", features = ["derive"]}  # 序列化
 serde_json = {version = "1.0.87", optional = true}
 nanoid = "0.4.0"  # 生成短链接 code
+
+lazy_static = "1.4.0"
+tera = "1"

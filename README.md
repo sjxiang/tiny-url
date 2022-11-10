@@ -10,3 +10,7 @@ Tiny URL API
 3. 查询全部生成的短链接地址
 
 ```
+
+
+页面端 trea template
+

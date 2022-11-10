@@ -1,8 +1,39 @@
-
-
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use tera::{Tera, Context};
+
 
 mod api;
+
+#[macro_use]
+extern crate lazy_static;
+ 
+lazy_static! {
+    pub static ref TEMPLATES: Tera = {
+        let tera = match Tera::new("templates/**/*") {
+            Ok(t) => t,
+            Err(e) => {
+                println!("Parsing error: {}", e);
+                ::std::process::exit(1);
+            }
+        };
+
+        tera
+    };
+}
+
+#[get("/")]
+async fn index() -> impl Responder {
+    let content = "Generate a tiny code for url";
+    let mut data = Context::new();
+    
+    data.insert("content", content);
+
+    let rendered = TEMPLATES.render("index.html", &data).unwrap();
+
+    HttpResponse::Ok().body(rendered)
+}
+
+
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -22,6 +53,7 @@ async fn manual_hello() -> impl Responder {
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
+            .service(index)
             .service(api::links::create_link)
             .service(api::links::get_all_links)
             .service(api::links::get_from_link)
