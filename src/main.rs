@@ -1,8 +1,11 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use tera::{Tera, Context};
+use crate::settings::Settings;
 
 
 mod api;
+mod settings;
+
 
 #[macro_use]
 extern crate lazy_static;
@@ -20,6 +23,7 @@ lazy_static! {
         tera
     };
 }
+
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -51,6 +55,10 @@ async fn manual_hello() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
+    let s = Settings::new().unwrap();
+    let ip = s.server.get_ip();
+
     HttpServer::new(|| {
         App::new()
             .service(index)
@@ -61,7 +69,8 @@ async fn main() -> std::io::Result<()> {
             .service(echo)
             .route("/hey", web::get().to(manual_hello))
     })
-    .bind(("127.0.0.1", 8080))?
+    // .bind(("127.0.0.1", 8080))?
+    .bind(&ip)?
     .run()
     .await
 }
